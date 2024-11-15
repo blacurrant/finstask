@@ -5,10 +5,15 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from datetime import datetime
 from enum import Enum
+import os
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
+database_url = os.getenv('DATABASE_URL', 'sqlite:///tasks.db')
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -107,5 +112,11 @@ def delete_task(task_id):
     db.session.commit()
     return '', 204
 
+@app.route('/health')
+def health_check():
+    return {'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()}
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+    # app.run(debug=True)
