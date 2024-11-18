@@ -8,7 +8,13 @@ from enum import Enum
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["https://your-amplify-app.amplifyapp.com"],
+        "methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 database_url = os.getenv('DATABASE_URL', 'sqlite:///tasks.db')
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
@@ -119,4 +125,3 @@ def health_check():
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-    # app.run(debug=True)
