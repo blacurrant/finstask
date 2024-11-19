@@ -1,0 +1,142 @@
+<div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-2xl font-semibold text-gray-900">Tasks</h1>
+      </div>
+      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <button
+          routerLink="/tasks/new"
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+        >
+          Add Task
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-8 bg-white p-4 shadow rounded-lg">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Entity Name</label>
+          <input
+            [(ngModel)]="filters.entity_name"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="Filter by entity"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Task Type</label>
+          <input
+            [(ngModel)]="filters.task_type"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="Filter by type"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+          <input
+            [(ngModel)]="filters.contact_person"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            placeholder="Filter by contact"
+          >
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status</label>
+          <select
+            [(ngModel)]="filters.status"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          >
+            <option value="">All</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button
+          (click)="applyFilters()"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="mt-8 flex flex-col">
+      <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    *ngFor="let column of ['creation_date', 'entity_name', 'task_type', 'task_time', 'contact_person', 'status']"
+                    (click)="updateSort(column)"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100"
+                  >
+                    {{ column | titlecase }}
+                    <span *ngIf="sortBy === column" class="ml-1">
+                      {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  </th>
+                  <th class="relative px-3 py-3.5">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                <tr *ngFor="let task of tasks">
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {{ task.creation_date | date }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {{ task.entity_name }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {{ task.task_type }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {{ task.task_time | date:'short' }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                    {{ task.contact_person }}
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm">
+                    <span
+                      [class]="task.status === 'open' 
+                        ? 'inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800'
+                        : 'inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800'"
+                    >
+                      {{ task.status }}
+                    </span>
+                  </td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <button
+                      (click)="updateStatus(task)"
+                      class="text-indigo-600 hover:text-indigo-900 mr-4"
+                    >
+                      Toggle Status
+                    </button>
+                    <button
+                      [routerLink]="['/tasks/edit', task.id]"
+                      class="text-indigo-600 hover:text-indigo-900 mr-4"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      (click)="deleteTask(task.id!)"
+                      class="text-red-600 hover:text-red-900"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
